@@ -1,0 +1,36 @@
+version: '3'
+vars:
+  CURL_SH: $(curl -fsSL https://raw.githubusercontent.com/robinbryce/git-bootstrap/refs/heads/main/git-bootstrap.sh)
+  LOCAL_SH: $(cat {{.TASKFILE_DIR}}/git-bootstrap.sh)
+tasks:
+  default:
+    - task: parse_checkout
+  parse_checkout:
+    desc: test parse_checkout
+    cmds:
+      - for:
+          - "git@github.com:latticexyz/mud.git@v.1.2.3 CHECKOUT mud v.1.2.3"
+          - "git@github.com:latticexyz/mud.git#foo@v.1.2.3 CHECKOUT foo v.1.2.3"
+          - "git@github.com:latticexyz/mud.git^bar CHECKOUT mud bar"
+          - "git@github.com:latticexyz/mud.git#foo^bar CHECKOUT foo bar"
+          - "git@github.com:latticexyz/mud.git@create-mud@2.2.14 CHECKOUT mud create-mud@2.2.14"
+          - "git@github.com:latticexyz/mud.git#foo@create-mud@2.2.14 CHECKOUT foo create-mud@2.2.14"
+          # default directory with no tag or branch
+          -  "git@github.com:latticexyz/mud.git NOOP git@github.com:latticexyz/mud.git"
+          # directory with no tag or branch
+          - "git@github.com:latticexyz/mud.git#foo NOOP git@github.com:latticexyz/mud.git#foo"
+        cmd: |
+            case="{{.ITEM}}"
+            input="${case%% *}"
+            expect="${case#* }"
+            # echo "input=$input; expect=$expect"
+            got=$(sh -c "{{.LOCAL_SH}}" - parse_checkout "$input")
+            if [[ "$got" != "$expect" ]]; then
+              echo "FAIL: $input => \"$got\", expected \"$expect\""
+              exit 1
+            fi
+            got=$(sh -c "{{.CURL_SH}}" - parse_checkout "$input")
+            if [[ "$got" != "$expect" ]]; then
+              echo "FAIL: (remote) $input => \"$got\", expected \"$expect\""
+              exit 1
+            fi
