@@ -74,8 +74,8 @@ env_setup() {
   eval "env_file=.env${ENV_SCOPE}.secrets"
   #echo "2: $env_file"
   [ -f "$op_dir/$env_file" ] && . "$op_dir/$env_file"
-  PROJECT_PREFIX=$(basename -- $(realpath "$1") | tr '-' '_' | tr '[:lower:]' '[:upper:]')
-  #echo "3: $PROJECT_PREFIX"
+  : ${PROJECT_PREFIX:=$(basename -- $(realpath "$1"))}
+  PROJECT_PREFIX=$(echo ${PROJECT_PREFIX} | tr '-' '_' | tr '[:lower:]' '[:upper:]')
 }
 
 # ---- Command implementations ----
@@ -103,8 +103,12 @@ dirs() {
 }
 
 clone() {
+
   env_setup "$1"
+  echo "Cloning repositories in $op_dir"
+
   cd $op_dir
+
 
   eval "checkout_var=\$${PROJECT_PREFIX}_GIT_CLONES_SSH"
 
@@ -127,7 +131,10 @@ clone() {
 }
 
 checkout() {
+
   env_setup "$1"
+  echo "Checking out repositories in $op_dir"
+
   eval "checkout_var=\$${PROJECT_PREFIX}_GIT_CHECKOUTS"
   cd $op_dir
 
