@@ -107,9 +107,9 @@ clone() {
 		repo=${item%%#*}
 		clone_dir=${item#*#}
 
-		echo "item: $item"
-		echo "repo: $repo"
-		echo "clone_dir: $clone_dir"
+		# echo "item: $item"
+		# echo "repo: $repo"
+		# echo "clone_dir: $clone_dir"
 
 		[ "$repo" = "$clone_dir" ] && clone_dir="$name"
 
