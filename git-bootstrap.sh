@@ -97,26 +97,34 @@ dirs() {
 
 clone() {
 	env_setup "$1"
+	shift
+
 	echo "Cloning repositories in $op_dir"
 	cd "$op_dir" || exit 1
 
 	eval "checkout_var=\$${PROJECT_PREFIX}_GIT_CLONES_SSH"
+
+	# Remaining args are passed to git clone
+	CLONE_ARGS="$*"
 
 	for item in $checkout_var; do
 		name=$(basename "${item%.git}")
 		repo=${item%%#*}
 		clone_dir=${item#*#}
 
-		# echo "item: $item"
-		# echo "repo: $repo"
-		# echo "clone_dir: $clone_dir"
-
 		[ "$repo" = "$clone_dir" ] && clone_dir="$name"
 
 		if [ -d "$clone_dir" ]; then
-			echo "$item already cloned $item, delete manually to re-clone"
+			echo "$item already cloned, delete manually to re-clone"
 		else
-			git clone "$repo" "$clone_dir"
+			echo "Cloning $repo into $clone_dir with options: $CLONE_ARGS"
+			# Use 'set --' to safely quote args for POSIX sh
+			if [ -n "$CLONE_ARGS" ]; then
+				# shellcheck disable=SC2086
+				git clone $CLONE_ARGS "$repo" "$clone_dir"
+			else
+				git clone "$repo" "$clone_dir"
+			fi
 		fi
 	done
 }
