@@ -163,7 +163,17 @@ checkout() {
 parse_checkout() {
   line=$1
   orig_item=$1
-  item=${orig_item#*@}
+
+  # An SSH "scp-like" entry (git@host:org/repo.git@ref) carries the ssh
+  # user as the first '@', which must be stripped before looking for the
+  # '@<ref>' / '^<ref>' marker. A URL with a scheme (https://host/...) has
+  # no such user prefix, so its first '@' (if any) IS the ref marker and
+  # must be left alone.
+  case "$orig_item" in
+  *://*) item=$orig_item ;;
+  *) item=${orig_item#*@} ;;
+  esac
+
   has_dir=${item#*#}
   has_at=${item#*@}
   has_branch=${item#*^}
