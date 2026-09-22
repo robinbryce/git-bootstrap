@@ -50,6 +50,16 @@ tasks:
           - "git@github.com:latticexyz/mud.git NOOP git@github.com:latticexyz/mud.git"
           # directory with no tag or branch
           - "git@github.com:latticexyz/mud.git#foo NOOP git@github.com:latticexyz/mud.git#foo"
+          # https URL, ref marker is the only '@' present (regression case)
+          - "https://github.com/latticexyz/mud.git@v.1.2.3 CHECKOUT mud v.1.2.3"
+          - "https://github.com/latticexyz/mud.git#foo@v.1.2.3 CHECKOUT foo v.1.2.3"
+          # https URL, branch marker (was already unaffected by the bug)
+          - "https://github.com/latticexyz/mud.git^bar CHECKOUT mud bar"
+          # https URL with no marker at all
+          - "https://github.com/latticexyz/mud.git NOOP https://github.com/latticexyz/mud.git"
+          # ref itself contains '/', both URL forms
+          - "https://github.com/org/repo.git@eventsv1/v0.0.3 CHECKOUT repo eventsv1/v0.0.3"
+          - "git@github.com:org/repo.git@eventsv1/v0.0.3 CHECKOUT repo eventsv1/v0.0.3"
         cmd: |
           case="{{.ITEM}}"
           input="${case%% *}"
